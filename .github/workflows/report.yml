@@ -1,0 +1,110 @@
+name: Lighthouse report
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  lighthouse-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@main
+
+      - name: Checkout the reports branch
+        run: |
+          git fetch --all
+          git checkout origin/reports
+
+      - name: Create temporary directories
+        run: |
+          test -f ./reports.json || touch ./reports.json
+          mkdir -p /tmp/artifacts ./reports
+          
+      - name: Generate the report
+        uses: foo-software/lighthouse-check-action@master
+        with:
+          author: ${{ github.actor }}
+          outputDirectory: /tmp/artifacts
+          urls: https://helpfulengineering.org
+          emulatedFormFactor: desktop
+
+      - name: Process the report results
+        id: results
+        run: |
+          echo "::set-output name=accessibility::$(jq -r .[0].scores.accessibility < /tmp/artifacts/results.json)"
+          echo "::set-output name=bestPractices::$(jq -r .[0].scores.bestPractices < /tmp/artifacts/results.json)"
+          echo "::set-output name=performance::$(jq -r .[0].scores.performance < /tmp/artifacts/results.json)"
+          echo "::set-output name=progressiveWebApp::$(jq -r .[0].scores.progressiveWebApp < /tmp/artifacts/results.json)"
+          echo "::set-output name=seo::$(jq -r .[0].scores.seo < /tmp/artifacts/results.json)"
+          jq -s '.[0] + .[1]' reports.json /tmp/artifacts/results.json > /tmp/artifacts/mix.json
+          mv /tmp/artifacts/mix.json reports.json
+          
+          base="$(basename "$(jq -r .[0].localReport < /tmp/artifacts/results.json)")"
+          time="$(grep -o '[0-9]' <<< "${base%.json.gz}" | tr -d '\n')"
+          echo "::set-output name=time::$time"
+
+          for report in /tmp/artifacts/*.html; do
+            base="$(basename "$report")"; name="${base%.html}"; time="${name/lighthouse-report-}"
+            perl -ne '/<script>window.__LIGHTHOUSE_JSON__ = (.*);<\/script>/ and print $1' "$report" |
+              gzip > "/tmp/artifacts/$time.json.gz"
+          done
+          
+          find /tmp/artifacts/*.json.gz | while read report; do
+            base="$(basename "$report")"
+            time="$(grep -o '[0-9]' <<< "${base%.json.gz}" | tr -d '\n')"
+            cat "$report" | gunzip | jq "{\"$time\": {\"address\": .requestedUrl, \"seconds\": (.audits.interactive.numericValue / 1000) | floor}}"
+          done | jq -s add > /tmp/artifacts/data.json
+          
+          test -f data.json || echo "{}" > data.json
+          jq -s '.[0] + .[1]' data.json /tmp/artifacts/data.json > /tmp/artifacts/mix.json
+          mv /tmp/artifacts/mix.json data.json
+
+          cp /tmp/artifacts/*.json.gz reports
+          
+      - name: Commit the report results
+        uses: EndBug/add-and-commit@v4
+        with:
+          add: "*.json reports"
+          ref: reports
+          message: Add reports
+          author_name: "GitHub Actions"
+          author_email: "actions@github.com"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          
+      - name: Retrieve the report results
+        run: |
+          rm -rf * || true
+          git checkout origin/reports -- "./reports" "./reports.json" "./data.json"
+          git checkout origin/main -- "./pages/*"
+          mv ./pages/* . && rmdir ./pages
+          
+      - name: Publish the report results
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ github.token }}
+          force_orphan: true
+          publish_branch: pages
+          publish_dir: .
+
+      - name: Send the reports to Slack
+        uses: rtCamp/action-slack-notify@v2.1.0
+        env:
+          SLACK_CHANNEL: devops
+          SLACK_COLOR: good
+          SLACK_ICON: https://developers.google.com/web/tools/lighthouse/images/lighthouse-logo.svg
+          SLACK_MESSAGE: |
+            Accessibility: ${{ steps.results.outputs.accessibility }}%
+            Best practices: ${{ steps.results.outputs.bestPractices }}%
+            Performance: ${{ steps.results.outputs.performance }}%
+            Progressive web application: ${{ steps.results.outputs.progressiveWebApp }}%
+            Search engine optimization: ${{ steps.results.outputs.seo }}%
+            :book: <https://helpfulengineering.github.io/lighthouse/report.html?time=${{ steps.results.outputs.time }}|*Read the full report*>
+          SLACK_FOOTER: |
+            <https://github.com/helpfulengineering/lighthouse/blob/master/.github/workflows/report.yml|Click here to modify this bot.>
+          SLACK_TITLE: Metrics for helpfulengineering.org
+          SLACK_USERNAME: Lighthouse
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          MSG_MINIMAL: true
