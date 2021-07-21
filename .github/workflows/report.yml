@@ -63,14 +63,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           
-      - name: Publish the report results
+      - name: Retrieve the report results
         run: |
-          git fetch --all
-          git checkout origin/pages
-          git rm -r "*" || true
+          rm -rf * .* || true
           git checkout origin/reports -- "./reports" "./reports.json" "./data.json"
           git checkout origin/main -- "./pages/*"
           mv ./pages/* . && rmdir ./pages
+          
+      - name: Publish the report results
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ github.token }}
+          force_orphan: true
+          publish_branch: pages
+          publish_dir: .
 
       - name: Send the reports to Slack
         uses: rtCamp/action-slack-notify@v2.1.0
