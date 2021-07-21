@@ -65,7 +65,7 @@ jobs:
           
       - name: Retrieve the report results
         run: |
-          rm -rf * .* || true
+          rm -rf * || true
           git checkout origin/reports -- "./reports" "./reports.json" "./data.json"
           git checkout origin/main -- "./pages/*"
           mv ./pages/* . && rmdir ./pages
