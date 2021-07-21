@@ -16,15 +16,7 @@ jobs:
         run: |
           git fetch --all
           git checkout origin/reports
-          
-      - name: Retrieve the configuration
-        id: configuration
-        run: |
-          git checkout origin/main -- "./configuration.json"
-          echo ::set-output name=addresses::"$(jq -r '.addresses | join(",")' < ./configuration.json)"
-          echo ::set-output name=emulated_form_factor::"$(jq -r '.emulated_form_factor' < ./configuration.json)"
-          rm ./configuration.json
-          
+
       - name: Create temporary directories
         run: |
           test -f ./reports.json || touch ./reports.json
@@ -34,8 +26,8 @@ jobs:
         with:
           author: ${{ github.actor }}
           outputDirectory: /tmp/artifacts
-          urls: "${{ steps.configuration.outputs.addresses }}"
-          emulatedFormFactor: "${{ steps.configuration.outputs.emulated_form_factor }}"
+          urls: https://helpfulengineering.org
+          emulatedFormFactor: desktop
 
       - name: Process the report results
         run: |
