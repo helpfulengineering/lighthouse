@@ -62,6 +62,15 @@ jobs:
           author_email: "actions@github.com"
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          
+      - name: Publish the report results
+        run: |
+          git fetch --all
+          git checkout origin/pages
+          git rm -r "*" || true
+          git checkout origin/reports -- "./reports" "./reports.json" "./data.json"
+          git checkout origin/main -- "./pages/*"
+          mv ./pages/* . && rmdir ./pages
 
       - name: Send the reports to Slack
         uses: rtCamp/action-slack-notify@v2.1.0
