@@ -1,7 +1,6 @@
 {
   "addresses": [
-    "https://coronavirus.jhu.edu/map.html",
-    "https://coronavirus.jhu.edu/us-map"
+    "https://helpfulengineering.org",
   ],
   "emulated_form_factor": "desktop"
 }
