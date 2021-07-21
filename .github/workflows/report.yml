@@ -2,7 +2,7 @@ name: Lighthouse report
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "0 0 * * *"
   workflow_dispatch:
 
 jobs:
@@ -29,7 +29,6 @@ jobs:
         run: |
           test -f ./reports.json || touch ./reports.json
           mkdir -p /tmp/artifacts ./reports
-
       - name: Generate the report
         uses: foo-software/lighthouse-check-action@master
         with:
@@ -42,7 +41,6 @@ jobs:
         run: |
           jq -s '.[0] + .[1]' reports.json /tmp/artifacts/results.json > /tmp/artifacts/mix.json
           mv /tmp/artifacts/mix.json reports.json
-
           for report in /tmp/artifacts/*.html; do
             base="$(basename "$report")"; name="${base%.html}"; time="${name/lighthouse-report-}"
             perl -ne '/<script>window.__LIGHTHOUSE_JSON__ = (.*);<\/script>/ and print $1' "$report" |
@@ -59,14 +57,28 @@ jobs:
           mv /tmp/artifacts/mix.json data.json
           
           cp /tmp/artifacts/*.json.gz reports
-
       - name: Commit the report results
         uses: EndBug/add-and-commit@v4
         with:
           add: "*.json reports"
           ref: reports
           message: Add reports
-          author_name: "0x2b3bfa0"
-          author_email: "0x2b3bfa0+git@googlemail.com"
+          author_name: "GitHub Actions"
+          author_email: "actions@github.com"
         env:
-          GITHUB_TOKEN: ${{ secrets.USER_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Send the reports to Slack
+        uses: rtCamp/action-slack-notify@v2.1.0
+        env:
+          SLACK_CHANNEL: 'devops'
+          SLACK_COLOR: 'good'
+          SLACK_ICON: ':face_with_monocle:'
+          SLACK_MESSAGE: |
+            To be done
+          SLACK_FOOTER: |
+            <https://github.com/helpfulengineering/lighthouse/blob/master/.github/workflows/report.yml|Click here to modify this bot.>
+          SLACK_TITLE: 'Metrics for helpfulengineering.org'
+          SLACK_USERNAME: 'Lighthouse'
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          MSG_MINIMAL: true
