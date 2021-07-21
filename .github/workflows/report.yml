@@ -66,14 +66,14 @@ jobs:
       - name: Send the reports to Slack
         uses: rtCamp/action-slack-notify@v2.1.0
         env:
-          SLACK_CHANNEL: 'devops'
-          SLACK_COLOR: 'good'
-          SLACK_ICON: ':face_with_monocle:'
+          SLACK_CHANNEL: devops
+          SLACK_COLOR: good
+          SLACK_ICON: https://developers.google.com/web/tools/lighthouse/images/lighthouse-logo.svg
           SLACK_MESSAGE: |
             To be done
           SLACK_FOOTER: |
             <https://github.com/helpfulengineering/lighthouse/blob/master/.github/workflows/report.yml|Click here to modify this bot.>
-          SLACK_TITLE: 'Metrics for helpfulengineering.org'
-          SLACK_USERNAME: 'Lighthouse'
+          SLACK_TITLE: Metrics for helpfulengineering.org
+          SLACK_USERNAME: Lighthouse
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           MSG_MINIMAL: true
