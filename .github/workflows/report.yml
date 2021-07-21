@@ -21,6 +21,7 @@ jobs:
         run: |
           test -f ./reports.json || touch ./reports.json
           mkdir -p /tmp/artifacts ./reports
+          
       - name: Generate the report
         uses: foo-software/lighthouse-check-action@master
         with:
@@ -48,8 +49,9 @@ jobs:
           stat data.json || echo "{}" > data.json
           jq -s '.[0] + .[1]' data.json /tmp/artifacts/data.json > /tmp/artifacts/mix.json
           mv /tmp/artifacts/mix.json data.json
-          
+
           cp /tmp/artifacts/*.json.gz reports
+          
       - name: Commit the report results
         uses: EndBug/add-and-commit@v4
         with:
