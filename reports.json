@@ -1,42 +1,6 @@
 [
   {
     "url": "https://helpfulengineering.org",
-    "localReport": "/tmp/artifacts/report-1626884602761.html",
-    "emulatedFormFactor": "desktop",
-    "scores": {
-      "accessibility": 94,
-      "bestPractices": 93,
-      "performance": 98,
-      "progressiveWebApp": 50,
-      "seo": 86
-    }
-  },
-  {
-    "url": "https://helpfulengineering.org",
-    "localReport": "/tmp/artifacts/report-1626884999480.html",
-    "emulatedFormFactor": "desktop",
-    "scores": {
-      "accessibility": 94,
-      "bestPractices": 93,
-      "performance": 98,
-      "progressiveWebApp": 50,
-      "seo": 86
-    }
-  },
-  {
-    "url": "https://helpfulengineering.org",
-    "localReport": "/tmp/artifacts/report-1626902489936.html",
-    "emulatedFormFactor": "desktop",
-    "scores": {
-      "accessibility": 94,
-      "bestPractices": 93,
-      "performance": 100,
-      "progressiveWebApp": 50,
-      "seo": 79
-    }
-  },
-  {
-    "url": "https://helpfulengineering.org",
     "localReport": "/tmp/artifacts/report-1626903355303.html",
     "emulatedFormFactor": "desktop",
     "scores": {
