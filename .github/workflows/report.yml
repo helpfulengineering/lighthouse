@@ -42,7 +42,7 @@ jobs:
           
           find /tmp/artifacts/*.json.gz | while read report; do
             base="$(basename "$report")"
-            time="$(grep -o '[0-9]' <<< "${base%.json.gz}")"
+            time="$(grep -o '[0-9]' <<< "${base%.json.gz}" | tr -d '\n')"
             cat "$report" | gunzip | jq "{\"$time\": {\"address\": .requestedUrl, \"seconds\": (.audits.interactive.numericValue / 1000) | floor}}"
           done | jq -s add > /tmp/artifacts/data.json
           
