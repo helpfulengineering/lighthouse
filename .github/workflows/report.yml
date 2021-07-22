@@ -17,6 +17,7 @@ jobs:
           outputDirectory: .
       - id: results
         run: |
+          cat ./results.josn
           test -f ./reports.json || touch ./reports.json
           mkdir -p /tmp/artifacts ./reports
           echo "::set-output name=accessibility::$(jq -r .[0].scores.accessibility < ./results.json)"
