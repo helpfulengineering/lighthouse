@@ -33,11 +33,12 @@ jobs:
       - name: Process the report results
         id: results
         run: |
-          echo "::set-output name=accessibility::$(jq -r .scores.accessibility < /tmp/artifacts/results.json)"
-          echo "::set-output name=bestPractices::$(jq -r .scores.bestPractices < /tmp/artifacts/results.json)"
-          echo "::set-output name=performance::$(jq -r .scores.performance < /tmp/artifacts/results.json)"
-          echo "::set-output name=progressiveWebApp$(jq -r .scores.progressiveWebApp < /tmp/artifacts/results.json)"
-          echo "::set-output name=seo::$(jq -r .scores.seo < /tmp/artifacts/results.json)"
+          cat /tmp/artifacts/results.json
+          echo "::set-output name=accessibility::$(jq -r .[0].scores.accessibility < /tmp/artifacts/results.json)"
+          echo "::set-output name=bestPractices::$(jq -r .[0].scores.bestPractices < /tmp/artifacts/results.json)"
+          echo "::set-output name=performance::$(jq -r .[0].scores.performance < /tmp/artifacts/results.json)"
+          echo "::set-output name=progressiveWebApp$(jq -r .[0].scores.progressiveWebApp < /tmp/artifacts/results.json)"
+          echo "::set-output name=seo::$(jq -r .[0].scores.seo < /tmp/artifacts/results.json)"
           jq -s '.[0] + .[1]' reports.json /tmp/artifacts/results.json > /tmp/artifacts/mix.json
           mv /tmp/artifacts/mix.json reports.json
           
