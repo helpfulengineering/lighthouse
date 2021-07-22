@@ -72,14 +72,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           
-      - name: Retrieve the report results
+      - name: Build the GitHub Pages directory structure
         run: |
           rm -rf * || true
           git checkout origin/reports -- "./reports" "./reports.json" "./data.json"
           git checkout origin/main -- "./pages/*"
           mv ./pages/* . && rmdir ./pages
           
-      - name: Publish the report results
+      - name: Publish the report results to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ github.token }}
@@ -91,8 +91,8 @@ jobs:
         uses: rtCamp/action-slack-notify@v2.1.0
         env:
           SLACK_CHANNEL: devops
-          SLACK_COLOR: good
-          SLACK_ICON: https://developers.google.com/web/tools/lighthouse/images/lighthouse-logo.svg
+          SLACK_USERNAME: Lighthouse
+          SLACK_TITLE: Metrics for helpfulengineering.org
           SLACK_MESSAGE: |
             Accessibility: ${{ steps.results.outputs.accessibility }}%
             Best practices: ${{ steps.results.outputs.bestPractices }}%
@@ -102,7 +102,5 @@ jobs:
             :book: <https://helpfulengineering.github.io/lighthouse/report.html?time=${{ steps.results.outputs.time }}|*Read the full report*>
           SLACK_FOOTER: |
             <https://github.com/helpfulengineering/lighthouse/blob/master/.github/workflows/report.yml|Click here to modify this bot.>
-          SLACK_TITLE: Metrics for helpfulengineering.org
-          SLACK_USERNAME: Lighthouse
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           MSG_MINIMAL: true
