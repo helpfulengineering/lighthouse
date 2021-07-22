@@ -31,6 +31,7 @@ jobs:
           emulatedFormFactor: desktop
 
       - name: Process the report results
+        id: results
         run: |
           echo "::set-output name=accessibility::$(jq -r .scores.accessibility < /tmp/artifacts/results.json)"
           echo "::set-output name=bestPractices::$(jq -r .scores.bestPractices < /tmp/artifacts/results.json)"
@@ -91,7 +92,11 @@ jobs:
           SLACK_COLOR: good
           SLACK_ICON: https://developers.google.com/web/tools/lighthouse/images/lighthouse-logo.svg
           SLACK_MESSAGE: |
-            To be done
+            Accessibility: ${{ steps.results.outputs.accessibility }}%
+            Best practices: ${{ steps.results.outputs.bestPractices }}%
+            Performance: ${{ steps.results.outputs.performance }}%
+            Progressive: web application ${{ steps.results.outputs.progressiveWebApp }}%
+            Search engine optimization: ${{ steps.results.outputs.seo }}%
           SLACK_FOOTER: |
             <https://github.com/helpfulengineering/lighthouse/blob/master/.github/workflows/report.yml|Click here to modify this bot.>
           SLACK_TITLE: Metrics for helpfulengineering.org
