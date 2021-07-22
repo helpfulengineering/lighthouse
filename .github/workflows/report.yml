@@ -15,37 +15,19 @@ jobs:
           urls: https://helpfulengineering.org
           emulatedFormFactor: desktop
           outputDirectory: .
+      - run: sudo apt install moreutils
       - id: results
         run: |
-          cat ./results.json | sponge /dev/null
-          test -f ./reports.json || touch ./reports.json
-          mkdir -p /tmp/artifacts ./reports
-          jq -r '.[0].scores | keys[] as $key | "::set-output name=\($key)::\(.[$key])"' < ./results.json
-          jq -s '.[0] + .[1]' reports.json ./results.json > ./mix.json
-          mv ./mix.json reports.json
-          
-          base="$(basename "$(jq -r .[0].localReport < ./results.json)")"
-          time="$(grep -o '[0-9]' <<< "${base%.json.gz}" | tr -d '\n')"
-          echo "::set-output name=time::$time"
-
+          mkdir -p ./reports
           for report in ./*.html; do
-            base="$(basename "$report")"; name="${base%.html}"; time="${name/lighthouse-report-}"
-            perl -ne '/<script>window.__LIGHTHOUSE_JSON__ = (.*);<\/script>/ and print $1' "$report" |
-              gzip > "./$time.json.gz"
-          done
-          
-          find ./*.json.gz | while read report; do
-            base="$(basename "$report")"
-            time="$(grep -o '[0-9]' <<< "${base%.json.gz}" | tr -d '\n')"
+            time="$(sed 's/.*\/report-\(\d+\)\.json\.gz')/\1/g')"
+            cat "$report" | perl -ne '/<script>window.__LIGHTHOUSE_JSON__ = (.*);<\/script>/ and print $1' | gzip > "./reports/$time.json.gz"
             cat "$report" | gunzip | jq "{\"$time\": {\"address\": .requestedUrl, \"seconds\": (.audits.interactive.numericValue / 1000) | floor}}"
-          done | jq -s add > ./data.json
-          
-          test -f data.json || echo "{}" > data.json
-          jq -s '.[0] + .[1]' data.json ./data.json > ./mix.json
-          mv ./mix.json data.json
-
-          cp ./*.json.gz reports
-          
+          done | jq -s add > ./performance.json
+          echo "::set-output name=time::$(jq -r .[0].localReport < ./results.json | sed 's/.*\/report-\(\d+\)\.json\.gz')/\1/g'"
+          jq -r '.[0].scores | keys[] as $key | "::set-output name=\($key)::\(.[$key])"' < ./results.json
+          jq -s '.[0] + .[1]' ./reports.json ./results.json | sponge ./reports.json
+          jq -s '.[0] + .[1]' ./data.json ./performance.json | sponge ./data.json
       - uses: EndBug/add-and-commit@v7
         with:
           ref: reports
