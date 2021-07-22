@@ -17,14 +17,10 @@ jobs:
           outputDirectory: .
       - id: results
         run: |
-          cat ./results.json
+          cat ./results.json | sponge /dev/null
           test -f ./reports.json || touch ./reports.json
           mkdir -p /tmp/artifacts ./reports
-          echo "::set-output name=accessibility::$(jq -r .[0].scores.accessibility < ./results.json)"
-          echo "::set-output name=bestPractices::$(jq -r .[0].scores.bestPractices < ./results.json)"
-          echo "::set-output name=performance::$(jq -r .[0].scores.performance < ./results.json)"
-          echo "::set-output name=progressiveWebApp::$(jq -r .[0].scores.progressiveWebApp < ./results.json)"
-          echo "::set-output name=seo::$(jq -r .[0].scores.seo < ./results.json)"
+          jq -r '.[0].scores | keys[] as $key | "::set-output name=\($key)::\(.[$key])"' < ./results.json
           jq -s '.[0] + .[1]' reports.json ./results.json > ./mix.json
           mv ./mix.json reports.json
           
