@@ -48,6 +48,7 @@ jobs:
           
       - uses: EndBug/add-and-commit@v7
         with:
+          ref: reports
           message: Add reports
           add: "data.json reports.json reports"
       - run: |
