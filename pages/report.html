@@ -7096,7 +7096,7 @@ if (typeof module !== 'undefined' && module.exports) {
     function loadData() {
       const time = (new URLSearchParams(window.location.search)).get("time");
       let request = new XMLHttpRequest();
-      request.open("GET", "./reports/" + time + ".json.gz", true);
+      request.open("GET", "./reports/report-" + time + ".json.gz", true);
       request.responseType = "arraybuffer";
 	    
       request.onload = function() {
