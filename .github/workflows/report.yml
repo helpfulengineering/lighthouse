@@ -19,42 +19,40 @@ jobs:
         run: |
           test -f ./reports.json || touch ./reports.json
           mkdir -p /tmp/artifacts ./reports
-          echo "::set-output name=accessibility::$(jq -r .[0].scores.accessibility < /tmp/artifacts/results.json)"
-          echo "::set-output name=bestPractices::$(jq -r .[0].scores.bestPractices < /tmp/artifacts/results.json)"
-          echo "::set-output name=performance::$(jq -r .[0].scores.performance < /tmp/artifacts/results.json)"
-          echo "::set-output name=progressiveWebApp::$(jq -r .[0].scores.progressiveWebApp < /tmp/artifacts/results.json)"
-          echo "::set-output name=seo::$(jq -r .[0].scores.seo < /tmp/artifacts/results.json)"
-          jq -s '.[0] + .[1]' reports.json /tmp/artifacts/results.json > /tmp/artifacts/mix.json
-          mv /tmp/artifacts/mix.json reports.json
+          echo "::set-output name=accessibility::$(jq -r .[0].scores.accessibility < ./results.json)"
+          echo "::set-output name=bestPractices::$(jq -r .[0].scores.bestPractices < ./results.json)"
+          echo "::set-output name=performance::$(jq -r .[0].scores.performance < ./results.json)"
+          echo "::set-output name=progressiveWebApp::$(jq -r .[0].scores.progressiveWebApp < ./results.json)"
+          echo "::set-output name=seo::$(jq -r .[0].scores.seo < ./results.json)"
+          jq -s '.[0] + .[1]' reports.json ./results.json > ./mix.json
+          mv ./mix.json reports.json
           
-          base="$(basename "$(jq -r .[0].localReport < /tmp/artifacts/results.json)")"
+          base="$(basename "$(jq -r .[0].localReport < ./results.json)")"
           time="$(grep -o '[0-9]' <<< "${base%.json.gz}" | tr -d '\n')"
           echo "::set-output name=time::$time"
 
-          for report in /tmp/artifacts/*.html; do
+          for report in ./*.html; do
             base="$(basename "$report")"; name="${base%.html}"; time="${name/lighthouse-report-}"
             perl -ne '/<script>window.__LIGHTHOUSE_JSON__ = (.*);<\/script>/ and print $1' "$report" |
-              gzip > "/tmp/artifacts/$time.json.gz"
+              gzip > "./$time.json.gz"
           done
           
-          find /tmp/artifacts/*.json.gz | while read report; do
+          find ./*.json.gz | while read report; do
             base="$(basename "$report")"
             time="$(grep -o '[0-9]' <<< "${base%.json.gz}" | tr -d '\n')"
             cat "$report" | gunzip | jq "{\"$time\": {\"address\": .requestedUrl, \"seconds\": (.audits.interactive.numericValue / 1000) | floor}}"
-          done | jq -s add > /tmp/artifacts/data.json
+          done | jq -s add > ./data.json
           
           test -f data.json || echo "{}" > data.json
-          jq -s '.[0] + .[1]' data.json /tmp/artifacts/data.json > /tmp/artifacts/mix.json
-          mv /tmp/artifacts/mix.json data.json
+          jq -s '.[0] + .[1]' data.json ./data.json > ./mix.json
+          mv ./mix.json data.json
 
-          cp /tmp/artifacts/*.json.gz reports
+          cp ./*.json.gz reports
           
       - uses: EndBug/add-and-commit@v7
         with:
           message: Add reports
           add: "data.json reports.json reports"
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
       - run: |
           mkdir ./public
           git checkout origin/reports -- ./reports ./reports.json ./data.json
@@ -64,9 +62,9 @@ jobs:
       - uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ github.token }}
-          force_orphan: true
           publish_branch: pages
-          publish_dir: public
+          publish_dir: ./public
+          force_orphan: true
       - uses: rtCamp/action-slack-notify@v2.1.0
         env:
           SLACK_CHANNEL: devops
