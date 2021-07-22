@@ -20,11 +20,11 @@ jobs:
         run: |
           mkdir -p ./reports
           for report in ./*.html; do
-            time="$(sed 's/.*\/report-\(\d+\)\.json\.gz')/\1/g')"
-            cat "$report" | perl -ne '/<script>window.__LIGHTHOUSE_JSON__ = (.*);<\/script>/ and print $1' | gzip > "./reports/$time.json.gz"
+            time="$(sed 's:.*/report-\([0-9]*\)\.html:\1:g' <<< "$report")"
             cat "$report" | gunzip | jq "{\"$time\": {\"address\": .requestedUrl, \"seconds\": (.audits.interactive.numericValue / 1000) | floor}}"
+            cat "$report" | perl -ne '/<script>window.__LIGHTHOUSE_JSON__ = (.*);<\/script>/ and print $1' | gzip > "./reports/$time.json.gz"
+            echo "::set-output name=time::$time"
           done | jq -s add > ./performance.json
-          echo "::set-output name=time::$(jq -r .[0].localReport < ./results.json | sed 's/.*\/report-\(\d+\)\.json\.gz')/\1/g'"
           jq -r '.[0].scores | keys[] as $key | "::set-output name=\($key)::\(.[$key])"' < ./results.json
           jq -s '.[0] + .[1]' ./reports.json ./results.json | sponge ./reports.json
           jq -s '.[0] + .[1]' ./data.json ./performance.json | sponge ./data.json
