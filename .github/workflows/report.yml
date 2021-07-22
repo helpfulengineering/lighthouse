@@ -30,7 +30,6 @@ jobs:
           jq -s '.[0] + .[1]' ./data.json ./performance.json | sponge ./data.json
       - uses: EndBug/add-and-commit@v7
         with:
-          ref: reports
           message: Add reports
           add: "data.json reports.json reports"
       - run: |
