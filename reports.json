@@ -490,5 +490,17 @@
       "progressiveWebApp": 33,
       "seo": 83
     }
+  },
+  {
+    "url": "https://helpfulengineering.org",
+    "localReport": "/tmp/artifacts/report-1645402014295.html",
+    "emulatedFormFactor": "desktop",
+    "scores": {
+      "accessibility": 95,
+      "bestPractices": 83,
+      "performance": 40,
+      "progressiveWebApp": 33,
+      "seo": 83
+    }
   }
 ]
