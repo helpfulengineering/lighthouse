@@ -1913,5 +1913,16 @@
       "performance": 56,
       "seo": 100
     }
+  },
+  {
+    "url": "https://helpfulengineering.org",
+    "localReport": "/tmp/artifacts/report-1717978948144.html",
+    "emulatedFormFactor": "desktop",
+    "scores": {
+      "accessibility": 83,
+      "bestPractices": 56,
+      "performance": 67,
+      "seo": 100
+    }
   }
 ]
