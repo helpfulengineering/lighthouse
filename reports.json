@@ -2012,5 +2012,16 @@
       "performance": 48,
       "seo": 100
     }
+  },
+  {
+    "url": "https://helpfulengineering.org",
+    "localReport": "/tmp/artifacts/report-1723422211309.html",
+    "emulatedFormFactor": "desktop",
+    "scores": {
+      "accessibility": 82,
+      "bestPractices": 59,
+      "performance": 64,
+      "seo": 100
+    }
   }
 ]
