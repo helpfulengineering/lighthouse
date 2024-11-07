@@ -23,7 +23,7 @@ jobs:
           mkdir -p /tmp/artifacts ./reports
           
       - name: Generate the report
-        uses: foo-software/lighthouse-check-action@master
+        uses: foo-software/lighthouse-check-action@v10.0.0
         with:
           author: ${{ github.actor }}
           outputDirectory: /tmp/artifacts
